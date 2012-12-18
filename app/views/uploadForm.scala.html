@@ -1,0 +1,106 @@
+@(uploadForm: Form[TweetMessage])
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {
+    Add a new contact <small><a href="#">Or edit an existing contact</a></small>
+}
+
+
+@main(title, nav = "contact") {
+
+    @helper.form(action = routes.Application.uploadTweet(), 'id -> "myUploadForm", 'enctype -> "multipart/form-data" ) {
+<div id="hidden" style="display:none;">
+<div class="tweet_block" style="margin:10px 0 30px;">
+<div class="waist">
+@inputText(uploadForm("tweet"))
+@inputText(uploadForm("author"))
+@inputText(uploadForm("hashtag_1"))
+@inputText(uploadForm("hashtag_2"))
+@inputText(uploadForm("hashtag_3"))
+@inputText(uploadForm("url_1"))
+@inputText(uploadForm("url_2"))
+@inputText(uploadForm("url_3"))
+</div>
+<div class="real">
+@helper.inputFile(uploadForm("tweetImg"))
+</div>
+</div>
+</div>
+        <div id="tweet_blocks">
+        <div class="tweet_block" style="margin:10px 0 30px;" id="tweet_block_0">
+        <div class="waist">
+        @inputText(uploadForm("tweet"))
+        @inputText(uploadForm("author"))
+        @inputText(uploadForm("hashtag_1"))
+        @inputText(uploadForm("hashtag_2"))
+        @inputText(uploadForm("hashtag_3"))
+        @inputText(uploadForm("url_1"))
+        @inputText(uploadForm("url_2"))
+        @inputText(uploadForm("url_3"))
+        </div>
+        <div class="real">
+        @inputHidden(uploadForm("jsonTweet"))
+        @helper.inputFile(uploadForm("tweetImg_0"))
+        </div>
+        </div>
+        </div>
+        <div class="clearfix">
+            <div class="input">
+                <input type="button" id="another" value="Add another tweet"/> or ...<br /><br />
+                <input type="submit" value="Upload all" />
+
+                <span class="help-inline"></span>
+                <span class="help-block"></span>
+            </div>
+        </div>
+
+    }
+
+
+    <script>
+        var counter = 0;
+        $('#myUploadForm').submit(function(ev) {
+            $('tweet_blocks').hide();
+            $('#hidden').remove();
+            var allData = [];
+            var json_input = $('#tweet_block_0 .real :input[name="jsonTweet"]');
+            json_input.val('[');
+            var test = $('#tweet_blocks .tweet_block .waist');
+            try{
+            $('#tweet_blocks .tweet_block .waist').each(function(index){
+                var data = {'hashtags':[], 'urls':[]};
+                var otherData = $(this).find(':input');
+                console.log(otherData);
+                $.each(otherData, function(j, obj){
+                    if(obj.name.indexOf("hashtag")==0)
+                        data.hashtags.push(obj.value);
+                    else if(obj.name.indexOf("url")==0)
+                        data.urls.push(obj.value);
+                    else data[obj.name] = $(obj).val();
+
+                    var test = $('#tweet_block_'+index+' :input[name="'+obj.name+'"]');
+                    $(obj).closest('div.clearfix').remove();
+                });
+                var imgInput = $('#tweet_block_'+index+' .real :input[name="tweetImg_'+index+'"]')[0];
+                if(imgInput) data['image'] = imgInput.value;
+                json_input.val(json_input.val()+JSON.stringify(data)+',');
+            });
+            } catch(ex){
+            }
+            var fullText = json_input.val();
+
+            fullText = fullText.substring(0, fullText.length-1);
+            json_input.val(fullText+']');
+        });
+
+        $('#another').click(function(ev){
+            counter++;
+            $('#hidden .tweet_block').clone().appendTo("#tweet_blocks");
+            $('#tweet_blocks .tweet_block:last').attr('id', 'tweet_block_'+counter);
+            $('#tweet_block_'+counter+' .real :input[name="tweetImg"]').attr('name', 'tweetImg_'+counter);
+        });
+
+
+    </script>
+}

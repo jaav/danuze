@@ -1,0 +1,86 @@
+@(title: String)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/json2.js")" type="text/javascript"></script>
+    </head>
+    <body>
+        @mymultipartform(id = "myUploadForm", action = routes.Application.uploadTweet){
+            Tweet content: <input type ="text" name="tweet" />
+                <input type="hidden" name="json_tweet"><br />
+                Tweet author: <input type ="text" name="author" /><br />
+                Hashtag: <input type ="text" name="hashtag_1" /><br />
+                Hashtag: <input type ="text" name="hashtag_2" /><br />
+                Hashtag: <input type ="text" name="hashtag_3" /><br />
+                Url: <input type ="text" name="url_1" /><br />
+                Url: <input type ="text" name="url_2" /><br />
+                Url: <input type ="text" name="url_3" /><br />
+                Importance: <select name="importance" >
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                </select><br />
+            Image: <input type="file" name="tweetimage"/><br />
+            <input type="submit" value="Upload" />
+        }
+    </body>
+            <script>
+                $('#myUploadForm').submit(function(ev) {
+                    ev.preventDefault();
+                    console.log($(this).serializeArray());
+
+                    var data = new FormData();
+                    jQuery.each($(this).find(':input[name="tweetimage"]')[0].files, function(i, file) {
+                        data.append('tweetimage', file);
+                    });
+                    var daForm = $(this);
+
+                    $.ajax({
+                        url: 'getImage64',
+                        data: data,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        type: 'POST',
+                        success: function(base){
+                            console.log(base);
+                            var data = {};
+                            var otherData = daForm.serializeArray();
+                            $.each(otherData, function(i, obj){
+                                data[obj.name] = obj.value;
+                            });
+                            var newForm = $('<form action="/uploadTweet" method="POST" id="tweetMsgForm"/>');
+                            var tweet = $('<input type="hidden" name="jsonTweet" />');
+                            var tweet_field = $('<input type="hidden" name="jsonTweet_field" />');
+                            tweet.val(JSON.stringify(data));
+                            tweet_field.val(JSON.stringify(data));
+                            var img = $('<input type="hidden" name="baseImg" value="'+base+'" />');
+                            newForm.append(tweet);
+                            newForm.append(tweet_field);
+                            newForm.append(img);
+
+                            newForm.submit();
+                            alert("That went well!!!");
+                        }
+                    });
+
+                    //from http://stackoverflow.com/questions/5392344/sending-multipart-formdata-with-jquery-ajax
+                    //var data = $(this).serializeArray();
+                });
+
+
+            </script>
+</html>

@@ -1,0 +1,13 @@
+@(message: String)
+@import helper._
+@import helper.twitterBootstrap._
+
+@title = {
+    Add a new contact <small><a href="#">Or edit an existing contact</a></small>
+}
+
+@main(title, "Welcome to Play 2.0") {
+    
+    @play20.welcome(message, style = "Java")
+    
+}
